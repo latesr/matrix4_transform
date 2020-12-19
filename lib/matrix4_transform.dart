@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -28,7 +29,7 @@ class Matrix4Transform {
 
   Matrix4Transform() : m = Matrix4.identity();
 
-  Matrix4Transform.from(Matrix4 m) : m = m?.clone();
+  Matrix4Transform.from(Matrix4 m) : m = m.clone();
 
   Matrix4Transform._(this.m);
 
@@ -36,8 +37,8 @@ class Matrix4Transform {
 
   /// Rotates by [angleRadians] radians, clockwise.
   /// If you define an origin it will have that point as the axis of rotation.
-  Matrix4Transform rotate(double angleRadians, {Offset origin}) {
-    if ((angleRadians == null) || (angleRadians == 0.0))
+  Matrix4Transform rotate(double angleRadians, {Offset? origin}) {
+    if (angleRadians == 0.0)
       return this;
     else if ((origin == null) || (origin.dx == 0.0 && origin.dy == 0.0))
       return Matrix4Transform._(m.clone()..rotateZ(angleRadians));
@@ -50,7 +51,7 @@ class Matrix4Transform {
 
   /// Rotates by [angleDegrees] degrees (0 to 360 one turn), clockwise.
   /// If you define an origin it will have that point as the axis of rotation.
-  Matrix4Transform rotateDegrees(double angleDegrees, {Offset origin}) =>
+  Matrix4Transform rotateDegrees(double angleDegrees, {Offset? origin}) =>
       rotate(_toRadians(angleDegrees), origin: origin);
 
   /// Rotates by [angleDegrees] degrees (0 to 360 one turn), clockwise.
@@ -69,9 +70,6 @@ class Matrix4Transform {
   /// Positive goes down/right.
   ///
   Matrix4Transform translate({double x = 0, double y = 0}) {
-    x ??= 0;
-    y ??= 0;
-
     return (x == 0 && y == 0) //
         ? this
         : Matrix4Transform._(m.clone()..leftTranslate(x, y));
@@ -90,9 +88,6 @@ class Matrix4Transform {
     double x = 0,
     double y = 0,
   }) {
-    x ??= 0;
-    y ??= 0;
-
     return (x == 0 && y == 0) //
         ? this
         : Matrix4Transform._(m.clone()..translate(x, y));
@@ -104,18 +99,14 @@ class Matrix4Transform {
   /// Same size for 1 (and passing null is the same as passing 1).
   /// No size for 0.
   /// Passing null is the same as passing 1.
-  Matrix4Transform scale(double factor, {Offset origin}) =>
-      scaleBy(x: factor, y: factor, origin: origin);
+  Matrix4Transform scale(double factor, {Offset? origin}) => scaleBy(x: factor, y: factor, origin: origin);
 
   /// Scales by a factor of [x] (horizontal) and [y] (vertical).
   /// Gets bigger for >1.
   /// Smaller for <1.
   /// Same size for 1 (and passing null is the same as passing 1).
   /// No size for 0.
-  Matrix4Transform scaleBy({double x = 1, double y = 1, Offset origin}) {
-    x ??= 1;
-    y ??= 1;
-
+  Matrix4Transform scaleBy({double x = 1, double y = 1, Offset? origin}) {
     if (x == 1 && y == 1)
       return this;
     else if ((origin == null) || (origin.dx == 0.0 && origin.dy == 0.0))
@@ -134,20 +125,18 @@ class Matrix4Transform {
   /// Smaller for <1.
   /// Same size for 1 (and passing null is the same as passing 1).
   /// No size for 0.
-  Matrix4Transform scaleHorizontally(double factor, {Offset origin}) =>
-      scaleBy(x: factor, origin: origin);
+  Matrix4Transform scaleHorizontally(double factor, {Offset? origin}) => scaleBy(x: factor, origin: origin);
 
   /// Scales by [factor] vertically. Keeps the same horizontal scale.
   /// Gets bigger for >1.
   /// Smaller for <1.
   /// Same size for 1 (and passing null is the same as passing 1).
   /// No size for 0.
-  Matrix4Transform scaleVertically(double factor, {Offset origin}) =>
-      scaleBy(y: factor, origin: origin);
+  Matrix4Transform scaleVertically(double factor, {Offset? origin}) => scaleBy(y: factor, origin: origin);
 
   /// Translates by [x] pixels (horizontal) and [y] pixels (vertical).
   /// Positive goes down/right.
-  Matrix4Transform translateOffset(Offset offset) {
+  Matrix4Transform translateOffset(Offset? offset) {
     return (offset == null) //
         ? this
         : Matrix4Transform._(m.clone()..translate(offset.dx, offset.dy));
@@ -199,19 +188,19 @@ class Matrix4Transform {
   Matrix4Transform downLeft(double distance) => //
       direction(pi * 3 / 4, distance);
 
-  Matrix4Transform flipDiagonally({Offset origin}) => //
+  Matrix4Transform flipDiagonally({Offset? origin}) => //
       _flipDegrees(horizontal: 180, vertical: 180, origin: origin);
 
-  Matrix4Transform flipHorizontally({Offset origin}) => //
+  Matrix4Transform flipHorizontally({Offset? origin}) => //
       _flipDegrees(horizontal: 180, origin: origin);
 
-  Matrix4Transform flipVertically({Offset origin}) => //
+  Matrix4Transform flipVertically({Offset? origin}) => //
       _flipDegrees(vertical: 180, origin: origin);
 
   Matrix4Transform _flip({
-    double horizontal = 0.0,
-    double vertical = 0.0,
-    Offset origin,
+    double? horizontal = 0.0,
+    double? vertical = 0.0,
+    Offset? origin,
   }) {
     if (((horizontal == null) || (horizontal == 0.0)) //
         &&
@@ -219,13 +208,13 @@ class Matrix4Transform {
       return this;
     else if ((origin == null) || (origin.dx == 0.0 && origin.dy == 0.0))
       return Matrix4Transform._(m.clone()
-        ..rotateY(horizontal)
-        ..rotateX(vertical));
+        ..rotateY(horizontal!)
+        ..rotateX(vertical!));
     else
       return Matrix4Transform._(m.clone()
         ..translate(origin.dx, origin.dy)
-        ..multiply(Matrix4.rotationY(horizontal))
-        ..multiply(Matrix4.rotationX(vertical))
+        ..multiply(Matrix4.rotationY(horizontal!))
+        ..multiply(Matrix4.rotationX(vertical!))
         ..translate(-origin.dx, -origin.dy));
   }
 
@@ -233,7 +222,7 @@ class Matrix4Transform {
   Matrix4Transform _flipDegrees({
     double horizontal = 0.0,
     double vertical = 0.0,
-    Offset origin,
+    Offset? origin,
   }) {
     return _flip(
       horizontal: _toRadians(horizontal),
@@ -259,13 +248,12 @@ class Matrix4TransformTween extends Tween<Matrix4Transform> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  Matrix4TransformTween({Matrix4Transform begin, Matrix4Transform end})
-      : super(begin: begin, end: end);
+  Matrix4TransformTween({Matrix4Transform? begin, Matrix4Transform? end}) : super(begin: begin, end: end);
 
   @override
   Matrix4Transform lerp(double t) {
     return Matrix4Transform.from(
-      Matrix4Tween(begin: begin.matrix4, end: end.matrix4).lerp(t),
+      Matrix4Tween(begin: begin?.matrix4, end: end?.matrix4).lerp(t),
     );
   }
 }
